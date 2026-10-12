@@ -23,3 +23,7 @@ def client(database_path: Path) -> Iterator[TestClient]:
 @pytest.fixture
 def car_payload() -> dict:
     return {"make": "Toyota", "model": "Corolla", "year": 2024, "color": "Silver"}
+
+
+def pytest_addoption(parser):
+    parser.addoption("--headed", action="store_true", help="Show the E2E browser window")
