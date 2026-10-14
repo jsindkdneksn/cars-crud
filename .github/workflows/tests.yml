@@ -1,4 +1,4 @@
-name: Cars CRUD Tests and Docker Publishing
+name: Cars CRUD - Test and Publish
 on:
   pull_request:
     branches: [main]
@@ -8,6 +8,7 @@ permissions:
   contents: read
 jobs:
   tests:
+    name: Run application tests
     runs-on: ubuntu-latest
     steps:
       - name: Download the repository
@@ -30,6 +31,7 @@ jobs:
         run: python -m pytest tests/e2e -q
 
   publish:
+    name: Build and publish Docker image
     needs: tests
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
@@ -45,4 +47,6 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/cars-crud:latest
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/cars-crud:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/cars-crud:sha-${{ github.sha }}
