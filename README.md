@@ -252,3 +252,30 @@ The following documentation covers the library mechanisms used in the code:
 - SQLite connections and SQL parameters: https://docs.python.org/3/library/sqlite3.html
 - Pydantic fields and validation: https://docs.pydantic.dev/latest/concepts/fields/
 - Playwright Python library: https://playwright.dev/python/docs/library
+
+
+## Docker Compose with MySQL
+
+The default application and existing test fixtures use SQLite. Compose sets
+`CARS_DB_BACKEND=mysql` and runs MySQL 8.4 as a separate `db` service.
+Explicit `create_app(database_path)` calls always use SQLite.
+
+1. Copy `.env.example` to `.env` and replace both sample passwords.
+2. Validate without printing resolved credentials: `docker compose config --quiet`.
+3. Start: `docker compose up --build -d`.
+4. Open http://localhost:8000/ (or set `APP_PORT` in `.env`).
+5. Save a car, run `docker compose down`, then `docker compose up -d`.
+   The car remains in the `mysql-data` named volume.
+
+MySQL port 3306 is internal to the Compose network. The app connects to `db`,
+not `localhost`. SQLite records do not automatically migrate to MySQL.
+Do not commit `.env`. `docker compose down -v` deletes the database volume;
+it is not part of the persistence check. Volume storage is not a backup.
+
+## Tested image delivery
+
+`.github/workflows/tests.yml` tests PRs to main without publishing. A push to
+main publishes only after the four test groups pass. Docker Hub credentials
+are read from `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN` repository secrets.
+The application image is published as `latest` and `sha-<full commit SHA>`.
+CI tests use SQLite; the MySQL deployment is verified separately with Compose.
